@@ -1,0 +1,52 @@
+In previous lessons we've seen that we have to use sync or locks to prevent critical 
+sections of code from the thread interference. But if we're not careful we can actually 
+cause more problems doing that than we actually solve. The first common pitfall 
+is called a DEADLOCK : it occurs when two or more threads are block on locks and every 
+thread that's blocked is holding a lock that another block thread wants.
+
+For instance, thread-1 is holding lock1 and waiting to acquire lock2, but thread-2 
+is holding lock2 and waiting to acquire lock1. Because all the thread holding the 
+locks are blocked they will never release the locks they're holding, 
+so none of the waiting threads will actually ever run.  
+
+How could we prevent DEADLOCKS from happening?
+
+1 - one solution could be only ever try to lock on a singLe object and if you 
+can write the code, so that only one lock is required the code won't deadlock. 
+But unfortunally that is not a practical solution for many applications that 
+need multiple locks.
+
+2 - a second solution would be to require that all threads must first try to obtain 
+the locks in the same order. E.g, in our example the deadlock was possible because 
+thread-1 tries to obtain lock1 and then lock2, while thread-2 does the opposite. 
+If we make both threads obtain the locks in the same order, a deadlock can't occur. 
+
+In our example, only the thread with the outer lock, will be able to obtain the inner, 
+so the second thread would wait until both actions are done, in then it'll execute. 
+This way the deadlock will be avoided.
+
+3 - Another solution would be to use a LOCK OBJECT rather than using synchronized blocks. 
+So using the tryLock() method with or without a timeOut will prevent deadlock, 
+but that will depend on the code.
+
+REMINDER : when the threads are running an object's synchronized method no other thread 
+can run a synchronized method using the same object until the first thread exits 
+the methods that it's running. 
+
+LECTURE 188 : More on DEADLOCKS ==============================================
+
+In Lecture 188 sample the cause of the deadlock is again that 2 threads are trying to get 
+the same two locks in a different order. This could be avoided the same ways we've studied so far. 
+Therefore we have to rewrite the code so that the two threads try to obtain the locks 
+in the same order, which in the case would mean not calling each other in a circular fashion. 
+We could also see if it's possible to pass information to other objects using parameters rather 
+than having them call methods to get the information. In a real world application we wouldn't 
+be mixing UI and Model code like this. 
+
+NOTE : An inner class variables with threads needs to be final.
+
+The potential for deadlock is more difficult to see here because we're using objects pasts 
+as parameters so, it's not obvious that we could have multiple threads trying to lock the 
+same objects but in a different order.
+
+ 
